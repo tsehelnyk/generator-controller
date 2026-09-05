@@ -9,6 +9,7 @@ import time
 
 RELAY_TIMER_DELAY = 3000                # затримка таймера реле в мілісекундах
 BATTERY_STATUS_CHECK_DELAY = 300000     # затримка між перевірками стану батареї
+BLINK_DELAY = 500                       # затримка між блиманням світлодіодів
 
 # Кнопка на GPIO4 з внутрішнім pull-up
 triggerBatteryStateButton = Pin(4, Pin.IN, Pin.PULL_UP)
@@ -77,7 +78,6 @@ while True:
     if batteryStateInput.value() == 1 and not operationInProgress and batteryStatusCheckTimer.active() == False:
         if batteryCharged:
             operation = "DISCHARGING"
-
             ledGreen.value(0)           
             ledYellow.value(1)          
             ledRed.value(0)  
@@ -94,21 +94,12 @@ while True:
             ledRed.value(0)  
             ledYellow.value(1)                
             relayIgnitionOut.value(0)   # увімкнути реле Ignition
-            time.sleep(5)
-            relayIgnitionOut.value(1)   # вимкнути реле Ignition
-            # buz.value(1) 
-            sleep = 100    
         else:
             operation = "STOP CHARGING"
             ledGreen.value(0)     
             ledRed.value(1)      
             ledYellow.value(1)          
-            # buz.value(1)                
             relayKillSwitchOut.value(0) # увімкнути реле Kill Switch
-            time.sleep(5)
-            relayKillSwitchOut.value(1) # вимкнути реле Kill Switch
-            # buz.value(0)     
-            sleep = 100
 
         operationInProgress = True
 
@@ -119,27 +110,21 @@ while True:
         operation = "OPERATION IN PROGRESS"
         if batteryCharged:
             ledGreen.value(1)
-            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
+            ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
         else:
             ledRed.value(1)
-            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
+            ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
 
     if batteryStateInput.value() == 1 and operationInProgress:
         operation = "WAITING 4 BATTERY CHECK"
         if batteryCharged:
             ledGreen.value(1)
-            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
+            ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
         else:
             ledRed.value(1)
-            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
+            ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
         
     displayMessage = time_service.local_time() + "     " + operation
     display_service.display_message(oled, displayMessage)    
     time.sleep(sleep) 
                  
-# Функція, яку викликає таймер
-# def timer_tick(timer):
-#     print("Таймер спрацював!")
-
-# Запускаємо таймер кожні 1000 мс (1 секунда)
-# tim.init(period=1000, mode=Timer.PERIODIC, callback=tick)
