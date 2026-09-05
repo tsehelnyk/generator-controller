@@ -8,7 +8,7 @@ import time
 
 
 RELAY_TIMER_DELAY = 5000                # затримка таймера реле в мілісекундах
-BATTERY_STATUS_CHECK_DELAY = 60000      # затримка між перевірками стану батареї
+BATTERY_STATUS_CHECK_DELAY = 90000      # затримка між перевірками стану батареї
 BLINK_DELAY = 500                       # затримка між блиманням світлодіодів
 
 # Кнопка на GPIO4 з внутрішнім pull-up
@@ -56,6 +56,8 @@ def battery_status_check(timer):
         else:
             relayKillSwitchOut.value(0) # увімкнути реле Kill Switch
 
+        relayTimer.init(period=RELAY_TIMER_DELAY, mode=Timer.ONE_SHOT, callback=relay_release) 
+
 def led_blink(timer, led):
     led.value(0)
 
@@ -64,12 +66,10 @@ triggerBatteryStateButton.irq(trigger=Pin.IRQ_RISING, handler=battery_state_isr)
 time_service.init_time()
 oled = display_service.init_display()
 
-# Створюємо таймер з ID=0
 relayTimer = Timer(0)
 batteryStatusCheckTimer = Timer(1)
 ledTimer = Timer(2)
 
-# time_start = time.ticks_ms()        # час запуску програми
 displayMessage = "Starting..."
 sleep = 1
 operation = ""
