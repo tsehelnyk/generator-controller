@@ -6,26 +6,30 @@ SIN_TABLE = [int(256 * sin(radians(i))) for i in range(360)]
 COS_TABLE = [int(256 * cos(radians(i))) for i in range(360)]
 
 def fast_sin(angle):
-    """Быстрый синус с использованием таблицы."""
+    """Fast sine using a lookup table."""
     return SIN_TABLE[angle % 360]
 
 def fast_cos(angle):
-    """Быстрый косинус с использованием таблицы."""
+    """Fast cosine using a lookup table."""
     return COS_TABLE[angle % 360]
 
-# Шрифт с кириллицей (8x8 пикселей)
+# Cyrillic font (8x8 pixels)
 font = {
-    # Кириллица (прописные)
+    # Cyrillic (uppercase)
     'А': b'\x10\x28\x44\x82\xFE\x82\x82\x82',
     'Б': b'\xFE\x80\x80\xFC\x82\x82\x82\xFC',
     'В': b'\xFC\x82\x82\xFC\x82\x82\x82\xFC',
     'Г': b'\xFE\x80\x80\x80\x80\x80\x80\x80',
+    'Ґ': b'\x04\xFC\x80\x80\x80\x80\x80\x80',
     'Д': b'\x0C\x12\x22\x42\x42\xFE\x82\x00',
     'Е': b'\xFC\x80\x80\xFC\x80\x80\xFC\x00',
     'Ё': b'\x48\x00\xFC\x80\xFC\x80\xFC\x00',
+    'Є': b'\x7C\x80\x80\xFC\x80\x80\x7C\x00',
     'Ж': b'\x8A\x8A\x8A\x74\x8A\x8A\x8A\x8A',
     'З': b'\x7C\x82\x02\x1C\x02\x82\x82\x7C',
     'И': b'\x82\x82\x86\x8A\x92\xA2\xC2\x82',
+    'І': b'\xFE\x10\x10\x10\x10\x10\x10\xFE',
+    'Ї': b'\x6C\x00\xFE\x10\x10\x10\x10\xFE',
     'Й': b'\x38\x86\x8A\x92\xA2\xC2\x82\x82',
     'К': b'\x82\x84\x88\xF0\x88\x84\x82\x82',
     'Л': b'\x3E\x22\x22\x42\x42\x42\x82\x00',
@@ -49,17 +53,21 @@ font = {
     'Э': b'\x7C\x82\x02\x3E\x02\x82\x82\x7C',
     'Ю': b'\x9C\xA2\xA2\xE2\xA2\xA2\xA2\x9C',
     'Я': b'\x3E\x42\x82\x42\x3E\x42\x82\x82',
-    # Кириллица (строчные)
+    # Cyrillic (lowercase)
     'а': b'\x00\x3C\x04\x02\x7E\x82\x7C\x00',
     'б': b'\x00\x78\x80\xF8\x84\x84\x78\x00',
     'в': b'\x00\xF8\x84\xF8\x84\x84\xF8\x00',
     'г': b'\x00\xFC\x80\x80\x80\x80\x80\x00',
+    'ґ': b'\x00\x04\xFC\x80\x80\x80\x80\x00',
     'д': b'\x00\x0C\x12\x22\x42\xFE\x82\x00',
     'е': b'\x00\x3C\x42\x81\xFF\x80\x7E\x00',
     'ё': b'\x48\x00\x78\x84\xFC\x80\x7C\x00',
+    'є': b'\x00\x3C\x80\x80\xFC\x80\x7E\x00',
     'ж': b'\x8A\x8A\x54\x28\x54\x8A\x8A\x00',
     'з': b'\x00\x78\x84\x08\x04\x84\x78\x00',
     'и': b'\x00\x84\x8C\x94\xA4\xC4\x84\x00',
+    'і': b'\x00\x10\x00\x30\x10\x10\x38\x00',
+    'ї': b'\x00\x28\x00\x30\x10\x10\x38\x00',
     'й': b'\x38\x8C\x94\xA4\xC4\x84\x84\x00',
     'к': b'\x00\x84\x88\xF0\x88\x84\x84\x00',
     'л': b'\x00\x3E\x22\x42\x42\x42\x82\x00',
@@ -83,7 +91,7 @@ font = {
     'э': b'\x00\x78\x84\x04\x3C\x04\x78\x00',
     'ю': b'\x00\x9C\xA2\xE2\xA2\xA2\x9C\x00',
     'я': b'\x00\x7C\x82\x42\x3C\x42\x82\x00',
-    # Латиница (прописные)
+    # Latin (uppercase)
     'A': b'\x10\x28\x44\x82\xFE\x82\x82\x82',
     'B': b'\xFC\x82\x82\xFC\x82\x82\x82\xFC',
     'C': b'\x7C\x82\x80\x80\x80\x80\x82\x7C',
@@ -110,7 +118,7 @@ font = {
     'X': b'\x82\x44\x28\x10\x28\x44\x82\x82',
     'Y': b'\x82\x44\x28\x10\x10\x10\x10\x10',
     'Z': b'\xFE\x02\x04\x08\x10\x20\x40\xFE',
-    # Латиница (строчные)
+    # Latin (lowercase)
     'a': b'\x00\x00\x78\x04\x7C\x84\x7C\x00',
     'b': b'\x00\x78\x80\xF8\x84\x84\x78\x00',
     'c': b'\x00\x00\x7C\x80\x80\x80\x7C\x00',
@@ -137,7 +145,7 @@ font = {
     'x': b'\x00\x00\x84\x48\x30\x48\x84\x00',
     'y': b'\x00\x00\x84\x84\x7C\x04\x78\x00',
     'z': b'\x00\x00\xFC\x08\x10\x20\xFC\x00',
-    # Цифры
+    # Digits
     '0': b'\x7C\x82\x82\x82\x82\x82\x82\x7C',
     '1': b'\x10\x30\x10\x10\x10\x10\x10\x38',
     '2': b'\x7C\x82\x02\x04\x18\x20\x40\xFE',
@@ -148,7 +156,7 @@ font = {
     '7': b'\xFE\x02\x04\x08\x10\x20\x40\x80',
     '8': b'\x7C\x82\x82\x7C\x82\x82\x82\x7C',
     '9': b'\x7C\x82\x82\x7E\x02\x02\x82\x7C',
-    # Спецсимволы
+    # Symbols
     '!': b'\x10\x10\x10\x10\x10\x00\x10\x00',
     '?': b'\x7C\x82\x02\x04\x08\x00\x08\x00',
     '@': b'\x7C\x82\xBA\xAA\xBE\x80\x82\x7C',
@@ -181,18 +189,18 @@ font = {
     '>': b'\x20\x10\x08\x04\x08\x10\x20\x00',
     '`': b'\x10\x08\x00\x00\x00\x00\x00\x00',
     '~': b'\x00\x44\xA8\x10\x00\x00\x00\x00',
-    # Пробел
+    # Space
     ' ': b'\x00\x00\x00\x00\x00\x00\x00\x00',
 }
 
 class SillyOled:
     def __init__(self, interface, width=128, height=64, **kwargs):
         """
-        Инициализация дисплея.
-        :param interface: Интерфейс (I2C или SPI).
-        :param width: Ширина дисплея (по умолчанию 128).
-        :param height: Высота дисплея (по умолчанию 64).
-        :param kwargs: Дополнительные параметры для I2C или SPI.
+        Initialize the display.
+        :param interface: Interface (I2C or SPI).
+        :param width: Display width (default 128).
+        :param height: Display height (default 64).
+        :param kwargs: Additional parameters for I2C or SPI.
         """
         self.interface = interface
         self.width = width
@@ -200,35 +208,35 @@ class SillyOled:
         self.font = font
         self.current_scale = 1
 
-        # Инициализация дисплея в зависимости от интерфейса
+        # Initialize the display depending on the interface
         if isinstance(interface, I2C):
-            # I2C-дисплей
+            # I2C display
             self.display = ssd1306.SSD1306_I2C(width, height, interface, addr=kwargs.get('address', 0x3C))
         elif isinstance(interface, SPI):
-            # SPI-дисплей
+            # SPI display
             dc = kwargs.get('dc')
             res = kwargs.get('res')
             cs = kwargs.get('cs')
             if not all([dc, res, cs]):
-                raise ValueError("Для SPI необходимо указать пины dc, res и cs.")
+                raise ValueError("For SPI, you must specify the pins dc, res, and cs.")
             self.display = ssd1306.SSD1306_SPI(width, height, interface, dc, res, cs)
         else:
-            raise ValueError("Неподдерживаемый интерфейс. Используйте I2C или SPI.")
+            raise ValueError("Unsupported interface. Use I2C or SPI.")
 
     def clear(self):
-        """Очистка экрана."""
+        """Clear the screen."""
         self.display.fill(0)
 
     def show(self):
-        """Обновление экрана."""
+        """Update the screen."""
         self.display.show()
     
     def set_font(self, font, width=8, height=8):
         """
-        Установка шрифта.
-        :param font: Словарь с данными шрифта.
-        :param width: Ширина символа.
-        :param height: Высота символа.
+        Set the font.
+        :param font: Dictionary with font data.
+        :param width: Width of the character.
+        :param height: Height of the character.
         """
         self.font = font
         self.char_width = width
@@ -236,84 +244,84 @@ class SillyOled:
 
     def scale(self, new_scale):
         """
-        Устанавливает масштаб текста.
-        :param new_scale: Новый масштаб (1, 2, 3 и т.д.).
+        Set the text scale.
+        :param new_scale: New scale (1, 2, 3, etc.).
         """
         if new_scale < 1:
-            new_scale = 1  # Минимальный масштаб — 1
+            new_scale = 1  # Minimum scale — 1
         self.current_scale = new_scale
         
     def text(self, text, x, y, align="left"):
         """
-        Вывод текста на экран.
-        :param text: Текст для отображения.
-        :param x: Координата X.
-        :param y: Координата Y.
-        :param align: Выравнивание ("left", "center", "right").
+        Display text on the screen.
+        :param text: Text to display.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param align: Alignment ("left", "center", "right").
         """
-        original_x = x  # Сохраняем начальную позицию x для переноса
-        char_width = 8 * self.current_scale  # Ширина символа с учётом масштаба
-        char_height = 8 * self.current_scale  # Высота символа с учётом масштаба
+        original_x = x  # Save the initial x position for line wrapping
+        char_width = 8 * self.current_scale  # Width of the character with scale
+        char_height = 8 * self.current_scale  # Height of the character with scale
 
-        # Вычисляем смещение для выравнивания
+        # Calculate the offset for alignment
         if align == "center":
-            x -= (len(text) * char_width) // 2  # Центрируем текст
+            x -= (len(text) * char_width) // 2  # Center the text
         elif align == "right":
-            x -= len(text) * char_width  # Выравниваем текст по правому краю
+            x -= len(text) * char_width  # Align the text to the right
 
         for char in text:
-            # Если символ выходит за границы экрана по ширине, переносим на новую строку
+            # If the character goes beyond the screen width, wrap to the next line
             if x + char_width > self.width:
-                x = original_x  # Возвращаемся к начальной позиции x
-                y += char_height  # Переходим на следующую строку
+                x = original_x  # Return to the initial x position
+                y += char_height  # Move to the next line
 
-                # Пересчитываем смещение для выравнивания на новой строке
+                # Recalculate the offset for alignment on the new line
                 if align == "center":
                     x -= (len(text) * char_width) // 2
                 elif align == "right":
                     x -= len(text) * char_width
 
-                # Если текст выходит за границы экрана по высоте, прекращаем вывод
+                # If the text goes beyond the screen boundaries in height, stop displaying
                 if y + char_height > self.height:
-                    return  # Выходим из функции
+                    return  # Exit the function
 
-            # Отрисовываем символ
+            # Draw the character
             self._draw_char(char, x, y)
-            x += char_width  # Сдвигаем позицию для следующего символа
-    
+            x += char_width  # Shift the position for the next character
+
     def scroll_text(self, text, y, delay=50, direction="left"):
         """
-        Прокрутка текста по экрану.
-        :param text: Текст для прокрутки.
-        :param y: Координата Y (высота текста).
-        :param delay: Задержка между кадрами (в миллисекундах).
-        :param direction: Направление прокрутки ("left", "right").
+        Scroll text across the screen.
+        :param text: Text to scroll.
+        :param y: Y coordinate (height of the text).
+        :param delay: Delay between frames (in milliseconds).
+        :param direction: Scroll direction ("left", "right").
         """
-        text_width = len(text) * 8 * self.current_scale  # Ширина текста
-        x = self.width if direction == "left" else -text_width  # Начальная позиция
+        text_width = len(text) * 8 * self.current_scale  # Width of the text
+        x = self.width if direction == "left" else -text_width  # Initial position
 
         while True:
-            self.clear()  # Очищаем экран
-            self.text(text, x, y)  # Рисуем текст
-            self.show()  # Обновляем экран
+            self.clear()  # Clear the screen
+            self.text(text, x, y)  # Draw the text
+            self.show()  # Update the screen
 
             if direction == "left":
-                x -= 1  # Двигаем текст влево
-                if x + text_width < 0:  # Если текст полностью ушёл за экран
-                    x = self.width  # Возвращаем его в начало
+                x -= 1  # Move the text to the left
+                if x + text_width < 0:  # If the text has completely moved off the screen
+                    x = self.width  # Return it to the start
             else:
-                x += 1  # Двигаем текст вправо
-                if x > self.width:  # Если текст полностью ушёл за экран
-                    x = -text_width  # Возвращаем его в начало
+                x += 1  # Move the text to the right
+                if x > self.width:  # If the text has completely moved off the screen
+                    x = -text_width  # Return it to the start
 
-            utime.sleep_ms(delay)  # Задержка для плавности
-            
+            utime.sleep_ms(delay)  # Delay for smoothness
+
     def draw_buffer(self, buffer, x, y, width, height):
         """
-        Отрисовка буфера данных на экран.
-        :param buffer: Буфер данных (список байтов).
-        :param x, y: Координаты начала отрисовки.
-        :param width, height: Размеры буфера.
+        Draw a data buffer on the screen.
+        :param buffer: Data buffer (list of bytes).
+        :param x, y: Coordinates of the buffer's origin.
+        :param width, height: Dimensions of the buffer.
         """
         for i in range(width):
             for j in range(height):
@@ -321,8 +329,8 @@ class SillyOled:
                     self.display.pixel(x + i, y + j, 1)
 
     def _draw_char(self, char, x, y):
-        """Отрисовка одного символа с масштабированием."""
-        """Оптимизированная отрисовка символа."""
+        """Draw a single character with scaling."""
+        """Optimized character drawing."""
         if char in self.font:
             char_data = self.font[char]
             for row in range(8):
@@ -333,9 +341,9 @@ class SillyOled:
     
     def fade_in(self, steps=10, delay=50):
         """
-        Плавное появление изображения.
-        :param steps: Количество шагов.
-        :param delay: Задержка между шагами (в миллисекундах).
+        Fade in the display.
+        :param steps: Number of steps.
+        :param delay: Delay between steps (in milliseconds).
         """
         for i in range(steps):
             self.contrast(int(255 * (i / steps)))
@@ -344,9 +352,9 @@ class SillyOled:
 
     def fade_out(self, steps=10, delay=50):
         """
-        Плавное исчезновение изображения.
-        :param steps: Количество шагов.
-        :param delay: Задержка между шагами (в миллисекундах).
+        Fade out the display.
+        :param steps: Number of steps.
+        :param delay: Delay between steps (in milliseconds).
         """
         for i in range(steps, -1, -1):
             self.contrast(int(255 * (i / steps)))
@@ -355,8 +363,8 @@ class SillyOled:
             
     def rotate(self, degrees=0):
         """
-        Поворот экрана.
-        :param degrees: Угол поворота (0, 90, 180, 270).
+        Rotate the display.
+        :param degrees: Rotation angle (0, 90, 180, 270).
         """
         if degrees == 0:
             self.display.rotate(False)
@@ -372,16 +380,16 @@ class SillyOled:
 
     def partial_update(self, x, y, width, height):
         """
-        Частичное обновление экрана.
-        :param x: Координата X.
-        :param y: Координата Y.
-        :param width: Ширина области.
-        :param height: Высота области.
+        Perform a partial update of the screen.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param width: Width of the area.
+        :param height: Height of the area.
         """
         self.display.show_partial(x, y, width, height)
 
     def rect(self, x, y, width, height, fill=False):
-        #Рисование прямоугольника.
+        #Draw a rectangle.
         if fill:
             for i in range(width):
                 for j in range(height):
@@ -396,11 +404,11 @@ class SillyOled:
 
     def line(self, x1, y1, x2, y2):
         """
-        Рисует линию.
-        :param x1: Начальная координата X.
-        :param y1: Начальная координата Y.
-        :param x2: Конечная координата X.
-        :param y2: Конечная координата Y.
+        Draw a line.
+        :param x1: Initial X coordinate.
+        :param y1: Initial Y coordinate.
+        :param x2: Final X coordinate.
+        :param y2: Final Y coordinate.
         """
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
@@ -421,7 +429,7 @@ class SillyOled:
                 y1 += sy
 
     def circle(self, x, y, radius, fill=False):
-        """Рисование круга."""
+        """Draw a circle."""
         f = 1 - radius
         ddf_x = 1
         ddf_y = -2 * radius
@@ -454,30 +462,30 @@ class SillyOled:
     
     def rounded_rect(self, x, y, width, height, radius, fill=False):
         """
-        Рисование закруглённого прямоугольника.
-        :param x: Координата X.
-        :param y: Координата Y.
-        :param width: Ширина.
-        :param height: Высота.
-        :param radius: Радиус закругления.
-        :param fill: Заливка (True/False).
+        Draw a rounded rectangle.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param width: Width.
+        :param height: Height.
+        :param radius: Corner radius.
+        :param fill: Fill flag (True/False).
         """
         if fill:
-            # Заливка основного прямоугольника
+            # Fill the main rectangle
             self.rect(x + radius, y, width - 2 * radius, height, fill=True)
             self.rect(x, y + radius, width, height - 2 * radius, fill=True)
-            # Заливка закруглённых углов
+            # Fill the rounded corners
             self.circle(x + radius, y + radius, radius, fill=True)
             self.circle(x + width - radius - 1, y + radius, radius, fill=True)
             self.circle(x + radius, y + height - radius - 1, radius, fill=True)
             self.circle(x + width - radius - 1, y + height - radius - 1, radius, fill=True)
         else:
-            # Рисование контура
-            self.line(x + radius, y, x + width - radius - 1, y)  # Верхняя линия
-            self.line(x + radius, y + height - 1, x + width - radius - 1, y + height - 1)  # Нижняя линия
-            self.line(x, y + radius, x, y + height - radius - 1)  # Левая линия
-            self.line(x + width - 1, y + radius, x + width - 1, y + height - radius - 1)  # Правая линия
-            # Рисование закруглённых углов
+            # Draw the outline
+            self.line(x + radius, y, x + width - radius - 1, y)  # Top line
+            self.line(x + radius, y + height - 1, x + width - radius - 1, y + height - 1)  # Bottom line
+            self.line(x, y + radius, x, y + height - radius - 1)  # Left line
+            self.line(x + width - 1, y + radius, x + width - 1, y + height - radius - 1)  # Right line
+            # Draw the rounded corners
             self.circle(x + radius, y + radius, radius)
             self.circle(x + width - radius - 1, y + radius, radius)
             self.circle(x + radius, y + height - radius - 1, radius)
@@ -485,10 +493,10 @@ class SillyOled:
     
     def thick_line(self, x1, y1, x2, y2, thickness=1):
         """
-        Рисование линии с заданной толщиной.
-        :param x1, y1: Начальная точка.
-        :param x2, y2: Конечная точка.
-        :param thickness: Толщина линии.
+        Draw a line with a specified thickness.
+        :param x1, y1: Initial point.
+        :param x2, y2: Final point.
+        :param thickness: Line thickness.
         """
         dx = abs(x2 - x1)
         dy = abs(y2 - y1)
@@ -512,20 +520,20 @@ class SillyOled:
     
     def triangle(self, x1, y1, x2, y2, x3, y3, fill=False):
         """
-        Рисование треугольника.
-        :param x1, y1: Координаты первой вершины.
-        :param x2, y2: Координаты второй вершины.
-        :param x3, y3: Координаты третьей вершины.
-        :param fill: Заливка (True/False).
+        Draw a triangle.
+        :param x1, y1: Coordinates of the first vertex.
+        :param x2, y2: Coordinates of the second vertex.
+        :param x3, y3: Coordinates of the third vertex.
+        :param fill: Fill flag (True/False).
         """
         if fill:
-            # Заливка треугольника (алгоритм сканлайн)
+            # Fill the triangle (scanline algorithm)
             def interpolate(y, x1, y1, x2, y2):
                 if y1 == y2:
                     return x1
                 return x1 + (y - y1) * (x2 - x1) // (y2 - y1)
 
-            # Сортируем вершины по Y
+            # Sort the vertices by Y
             vertices = sorted([(x1, y1), (x2, y2), (x3, y3)], key=lambda v: v[1])
             x1, y1 = vertices[0]
             x2, y2 = vertices[1]
@@ -540,21 +548,21 @@ class SillyOled:
                     x_end = interpolate(y, x1, y1, x3, y3)
                 self.line(int(x_start), y, int(x_end), y)
         else:
-            # Рисуем только контур
+            # Draw only the outline
             self.line(x1, y1, x2, y2)
             self.line(x2, y2, x3, y3)
             self.line(x3, y3, x1, y1)
     
     def gradient(self, x, y, width, height, color1, color2, direction="horizontal"):
         """
-        Рисование градиента.
-        :param x: Координата X.
-        :param y: Координата Y.
-        :param width: Ширина градиента.
-        :param height: Высота градиента.
-        :param color1: Начальный цвет (0-255).
-        :param color2: Конечный цвет (0-255).
-        :param direction: Направление градиента ("horizontal" или "vertical").
+        Draw a gradient.
+        :param x: X coordinate.
+        :param y: Y coordinate.
+        :param width: Width of the gradient.
+        :param height: Height of the gradient.
+        :param color1: Initial color (0-255).
+        :param color2: Final color (0-255).
+        :param direction: Gradient direction ("horizontal" or "vertical").
         """
         for i in range(width if direction == "horizontal" else height):
             t = i / (width if direction == "horizontal" else height)
@@ -566,12 +574,12 @@ class SillyOled:
     
     def ellipse(self, x, y, width, height, fill=False):
         """
-        Рисование эллипса.
-        :param x: Координата X центра.
-        :param y: Координата Y центра.
-        :param width: Ширина эллипса.
-        :param height: Высота эллипса.
-        :param fill: Заливка (True/False).
+        Draw an ellipse.
+        :param x: X coordinate of the center.
+        :param y: Y coordinate of the center.
+        :param width: Width of the ellipse.
+        :param height: Height of the ellipse.
+        :param fill: Fill flag (True/False).
         """
         a = width // 2
         b = height // 2
@@ -582,60 +590,60 @@ class SillyOled:
 
     def smooth_curve(self, x, y, length, angle, amplitude, phase=0, steps=20):
         """
-        Рисование плавной кривой, похожей на синусоиду.
-        :param x, y: Начальная точка.
-        :param length: Длина кривой.
-        :param angle: Угол наклона кривой (в градусах).
-        :param amplitude: Амплитуда кривой (сила изгиба).
-        :param phase: Фаза кривой (смещение).
-        :param steps: Количество шагов для сглаживания.
+        Draw a smooth curve, similar to a sine wave.
+        :param x, y: Initial point.
+        :param length: Length of the curve.
+        :param angle: Angle of the curve (in degrees).
+        :param amplitude: Amplitude of the curve (bending strength).
+        :param phase: Phase of the curve (offset).
+        :param steps: Number of steps for smoothing.
         """
         """
-        Оптимизированная версия smooth_curve.
+        Optimized version of smooth_curve.
         """
-        angle_rad = angle % 360  # Нормализуем угол
+        angle_rad = angle % 360  # Normalize angle to [0, 360)
         prev_x, prev_y = x, y
 
         for i in range(steps + 1):
-            t = (i << 8) // steps  # Параметр t в формате fixed-point (8 бит на дробную часть)
-            # Вычисляем текущую точку на кривой
+            t = (i << 8) // steps  # Parameter t in fixed-point format (8 bits for fractional part)
+            # Compute the current point on the curve
             curve_x = x + (t * length * fast_cos(angle_rad)) >> 8
             curve_y = y + (t * length * fast_sin(angle_rad)) >> 8
             curve_y += (amplitude * fast_sin(phase + (t * 314) >> 8)) >> 8
-            # Рисуем линию между текущей и предыдущей точкой
+            # Draw a line between the current and previous point
             self.line(prev_x, prev_y, curve_x, curve_y)
             prev_x, prev_y = curve_x, curve_y
     
     def bitmap(self, x, y, data, width, height):
         """
-        Отображение bitmap-изображения.
-        :param x: Координата X.
-        :param y: Координата Y.
-        :param data: Данные изображения (список байтов).
-        :param width: Ширина изображения.
-        :param height: Высота изображения.
+        Show bitmap-picture.
+        :param x: Coordinate X.
+        :param y: Coordinate Y.
+        :param data: Picture data (byte list).
+        :param width: Weight of picture.
+        :param height: height of picture.
         """
-        for j in range(height):  # Проходим по строкам (высота)
-            for i in range(width):  # Проходим по столбцам (ширина)
-                # Получаем текущий байт (строка изображения)
+        for j in range(height):  # Cycle through rows (height)
+            for i in range(width):  # Cycle through columns (width)
+                # Get the current byte (image row)
                 byte = data[j]
-                # Проверяем, включён ли бит в текущей позиции
+                # Check if the bit is set in the current position
                 if byte & (1 << (width - 1 - i)):
                     self.display.pixel(x + i, y + j, 1)
 
-    # Новые функции из оригинальной библиотеки ssd1306
+    # New functions from the original library ssd1306
 
     def contrast(self, value):
         """
-        Устанавливает контраст дисплея.
-        :param value: Значение контраста (0-255).
+        Sets the display contrast.
+        :param value: Contrast value (0-255).
         """
         self.display.contrast(value)
 
     def power(self, on=True):
-        """Включение/выключение дисплея."""
+        """on/off display."""
         self.display.poweron() if on else self.display.poweroff()
 
     def invert(self, invert=True):
-        """Инвертирование цветов."""
+        """Invert colors."""
         self.display.invert(invert)

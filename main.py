@@ -7,8 +7,8 @@ import time_service
 import time
 
 
-# Створюємо таймер з ID=0
-tim = Timer(0)
+RELAY_TIMER_DELAY = 3000                # затримка таймера реле в мілісекундах
+BATTERY_STATUS_CHECK_DELAY = 300000     # затримка між перевірками стану батареї
 
 # Кнопка на GPIO4 з внутрішнім pull-up
 triggerBatteryStateButton = Pin(4, Pin.IN, Pin.PULL_UP)
@@ -32,52 +32,74 @@ ledYellow.value(1)                  # увімкнути жовтий LED
 # Базєр
 # buz = Pin(23, Pin.OUT)
 
-# Реле
+# Ініціалізація реле
 relayIgnitionOut = Pin(18, Pin.OUT)
 relayIgnitionOut.value(1)           # вимкнути реле Ignition
 relayKillSwitchOut = Pin(19, Pin.OUT)
 relayKillSwitchOut.value(1)         # вимкнути реле Kill Switch
 
+operationInProgress = False       # стан виконання операції
+
 def battery_state_isr(pin):
    global batteryCharged
    batteryCharged =  not batteryCharged
-   print("Button pressed!" + (" Battery is now CHARGING" if batteryCharged else " Battery is now DISCHARGING") + ". Battery state input: " + str(batteryStateInput.value()))
+
+def relay_release(timer):
+    relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
+    relayIgnitionOut.value(1)       # вимкнути реле Ignition
+
+def battery_status_check(timer):
+    if batteryStateInput.value() == 1:
+        global batteryCharged
+        batteryCharged = not batteryCharged
+        global operationInProgress
+        operationInProgress = False
+
+def led_blink(timer, led):
+    led.value(0)
 
 triggerBatteryStateButton.irq(trigger=Pin.IRQ_RISING, handler=battery_state_isr)
-# batteryStateInput.irq(trigger=Pin.IRQ_FALLING, handler=battery_state_isr)
 
 time_service.init_time()
 oled = display_service.init_display()
 
-while True:
-    sleep = 0.5
+# Створюємо таймер з ID=0
+relayTimer = Timer(0)
+batteryStatusCheckTimer = Timer(1)
+ledTimer = Timer(2)
 
-    if batteryStateInput.value() == 1:
+# time_start = time.ticks_ms()        # час запуску програми
+displayMessage = "Starting..."
+sleep = 0.5
+operation = ""
+
+while True:
+    if batteryStateInput.value() == 1 and not operationInProgress and batteryStatusCheckTimer.active() == False:
         if batteryCharged:
-            displayMessage = time_service.local_time() + "     " + "DISCHARGING"
+            operation = "DISCHARGING"
+
             ledGreen.value(0)           
             ledYellow.value(1)          
             ledRed.value(0)  
         else:
-            displayMessage = time_service.local_time() + "     " + "CHARGING"
+            operation = "CHARGING"
             ledGreen.value(1)           
             ledRed.value(0)  
             ledYellow.value(0)      
 
-    if batteryStateInput.value() == 0:
+    if batteryStateInput.value() == 0 and not operationInProgress and batteryStatusCheckTimer.active() == False:
         if batteryCharged:
-            displayMessage = time_service.local_time() + "     " + "START        CHARGING"
+            operation = "START CHARGING"
             ledGreen.value(1)           
             ledRed.value(0)  
-            ledYellow.value(1)          
-            # buz.value(1)              
+            ledYellow.value(1)                
             relayIgnitionOut.value(0)   # увімкнути реле Ignition
             time.sleep(5)
             relayIgnitionOut.value(1)   # вимкнути реле Ignition
             # buz.value(1) 
             sleep = 100    
         else:
-            displayMessage = time_service.local_time() + "     " + "STOP         CHARGING"
+            operation = "STOP CHARGING"
             ledGreen.value(0)     
             ledRed.value(1)      
             ledYellow.value(1)          
@@ -88,12 +110,30 @@ while True:
             # buz.value(0)     
             sleep = 100
 
-        display_service.display_message(oled, displayMessage)    
-        time.sleep(sleep)
+        operationInProgress = True
 
-        if batteryStateInput.value() == 1:
-            batteryCharged = not batteryCharged
+        relayTimer.init(period=RELAY_TIMER_DELAY, mode=Timer.ONE_SHOT, callback=relay_release) 
+        batteryStatusCheckTimer.init(period=BATTERY_STATUS_CHECK_DELAY, mode=Timer.ONE_SHOT, callback=battery_status_check)
 
+    if batteryStateInput.value() == 0 and operationInProgress:
+        operation = "OPERATION IN PROGRESS"
+        if batteryCharged:
+            ledGreen.value(1)
+            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
+        else:
+            ledRed.value(1)
+            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
+
+    if batteryStateInput.value() == 1 and operationInProgress:
+        operation = "WAITING 4 BATTERY CHECK"
+        if batteryCharged:
+            ledGreen.value(1)
+            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
+        else:
+            ledRed.value(1)
+            ledTimer.init(period=500, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
+        
+    displayMessage = time_service.local_time() + "     " + operation
     display_service.display_message(oled, displayMessage)    
     time.sleep(sleep) 
                  
