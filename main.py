@@ -1,15 +1,18 @@
 from machine import Pin
 from machine import Timer
+from machine import WDT
+
+import time
+import machine
 
 import display_service
 import time_service
 
-import time
-
-
-RELAY_TIMER_DELAY = 5000                # затримка таймера реле в мілісекундах
-BATTERY_STATUS_CHECK_DELAY = 90000      # затримка між перевірками стану батареї
+RELAY_TIMER_DELAY = 5*1000              # затримка таймера реле в мілісекундах
+BATTERY_STATUS_CHECK_DELAY = 90*1000    # затримка між перевірками стану батареї
 BLINK_DELAY = 500                       # затримка між блиманням світлодіодів
+RESTART_DELAY = 30*60*1000              # затримка між перезапусками ESP32
+WATCHDOG_TIMEOUT = 5*1000               # таймаут watchdog в мілісекундах
 
 # Кнопка на GPIO4 з внутрішнім pull-up
 triggerBatteryStateButton = Pin(4, Pin.IN, Pin.PULL_UP)
@@ -41,9 +44,17 @@ relayKillSwitchOut.value(1)         # вимкнути реле Kill Switch
 
 operationInProgress = False         # стан виконання операції
 
+# Ініціалізація watchdog (5 секунд)
+wdt = WDT(timeout=WATCHDOG_TIMEOUT)
+
 def battery_state_isr(pin):
    global batteryCharged
    batteryCharged =  not batteryCharged
+
+# Функція для перезапуску через таймер
+def restart(timer):
+    # print("Регулярний перезапуск ESP32...")
+    machine.reset()
 
 def relay_release(timer):
     relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
@@ -69,6 +80,7 @@ oled = display_service.init_display()
 relayTimer = Timer(0)
 batteryStatusCheckTimer = Timer(1)
 ledTimer = Timer(2)
+restartTimer = machine.Timer(3)
 
 displayMessage = "Starting..."
 sleep = 1
@@ -118,8 +130,13 @@ while True:
         batteryStatusCheckTimer.deinit()  # зупинити таймер перевірки стану батареї
         batteryCharged = not batteryCharged
         operationInProgress = False
+
+        # Перезапуск ESP32 через таймер після завершення операції зарядки батареї
+        if batteryCharged:
+            restartTimer.init(period=RESTART_DELAY, mode=machine.Timer.ONE_SHOT, callback=restart)
         
     displayMessage = time_service.local_time() + "     " + operation
-    display_service.display_message(oled, displayMessage)    
+    display_service.display_message(oled, displayMessage)  
+    wdt.feed()                            # скидання таймера watchdog  
     time.sleep(sleep) 
                  
