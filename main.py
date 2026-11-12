@@ -33,8 +33,7 @@ ledRed.value(0)                     # вимкнути червоний LED
 ledYellow = Pin(23, Pin.OUT)        # discharging
 ledYellow.value(1)                  # увімкнути жовтий LED
 
-# Базєр
-# buz = Pin(23, Pin.OUT)
+# buzzer = Pin(23, Pin.OUT)
 
 # Ініціалізація реле
 relayIgnitionOut = Pin(18, Pin.OUT)
@@ -71,6 +70,20 @@ def battery_status_check(timer):
 
 def led_blink(timer, led):
     led.value(0)
+
+# Функція, яку викликає таймер
+def relay_release(timer):
+    # print("Таймер 0 спрацював!")
+    relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
+    relayIgnitionOut.value(1)       # вимкнути реле Ignition
+
+def battery_status_check(timer):
+    # print("Таймер 1 спрацював!")
+    if batteryStateInput.value() == 1:
+        global batteryCharged
+        batteryCharged = not batteryCharged
+        global operation_in_progress
+        operation_in_progress = False
 
 triggerBatteryStateButton.irq(trigger=Pin.IRQ_RISING, handler=battery_state_isr)
 
@@ -139,4 +152,3 @@ while True:
     display_service.display_message(oled, displayMessage)  
     wdt.feed()                            # скидання таймера watchdog  
     time.sleep(sleep) 
-                 
