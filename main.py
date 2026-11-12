@@ -9,21 +9,18 @@ import display_service
 import time_service
 
 RELAY_TIMER_DELAY = 5*1000              # затримка таймера реле в мілісекундах
-BATTERY_STATUS_CHECK_DELAY = 90*1000    # затримка між перевірками стану батареї
 BLINK_DELAY = 500                       # затримка між блиманням світлодіодів
 RESTART_DELAY = 30*60*1000              # затримка між перезапусками ESP32
 WATCHDOG_TIMEOUT = 5*1000               # таймаут watchdog в мілісекундах
 
-# Кнопка на GPIO4 з внутрішнім pull-up
-triggerBatteryStateButton = Pin(4, Pin.IN, Pin.PULL_UP)
+# # Кнопка на GPIO4 з внутрішнім pull-up
+# triggerBatteryStateButton = Pin(4, Pin.IN, Pin.PULL_UP)
 
 # Кнопка на GPIO5 з внутрішнім pull-up
 batteryStateInput = Pin(5, Pin.IN, Pin.PULL_UP)
 
-# Кнопка на GPIOx з внутрішнім pull-up
-# switchAuto = Pin(x, Pin.IN, Pin.PULL_UP)
-
-batteryCharged = True  # стан зарядки
+# Кнопка на GPIO4 з внутрішнім pull-up
+chargingStateInput = Pin(4, Pin.IN, Pin.PULL_UP)
 
 # Зовнішні світлодіоди
 ledGreen = Pin(16, Pin.OUT)         # charging
@@ -46,52 +43,23 @@ operationInProgress = False         # стан виконання операці
 # Ініціалізація watchdog (5 секунд)
 wdt = WDT(timeout=WATCHDOG_TIMEOUT)
 
-def battery_state_isr(pin):
-   global batteryCharged
-   batteryCharged =  not batteryCharged
-
 # Функція для перезапуску через таймер
 def restart(timer):
     # print("Регулярний перезапуск ESP32...")
     machine.reset()
-
-def relay_release(timer):
-    relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
-    relayIgnitionOut.value(1)       # вимкнути реле Ignition
-
-def battery_status_check(timer):
-    if batteryStateInput.value() == 0:
-        if batteryCharged:
-            relayIgnitionOut.value(0)   # увімкнути реле Ignition
-        else:
-            relayKillSwitchOut.value(0) # увімкнути реле Kill Switch
-
-        relayTimer.init(period=RELAY_TIMER_DELAY, mode=Timer.ONE_SHOT, callback=relay_release) 
 
 def led_blink(timer, led):
     led.value(0)
 
 # Функція, яку викликає таймер
 def relay_release(timer):
-    # print("Таймер 0 спрацював!")
     relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
     relayIgnitionOut.value(1)       # вимкнути реле Ignition
-
-def battery_status_check(timer):
-    # print("Таймер 1 спрацював!")
-    if batteryStateInput.value() == 1:
-        global batteryCharged
-        batteryCharged = not batteryCharged
-        global operation_in_progress
-        operation_in_progress = False
-
-triggerBatteryStateButton.irq(trigger=Pin.IRQ_RISING, handler=battery_state_isr)
 
 time_service.init_time()
 oled = display_service.init_display()
 
 relayTimer = Timer(0)
-batteryStatusCheckTimer = Timer(1)
 ledTimer = Timer(2)
 restartTimer = machine.Timer(3)
 
@@ -101,7 +69,7 @@ operation = ""
 
 while True:
     if batteryStateInput.value() == 1 and not operationInProgress:
-        if batteryCharged:
+        if chargingStateInput.value() == 1:
             operation = "DISCHARGING"
             ledGreen.value(0)           
             ledYellow.value(1)          
@@ -113,7 +81,7 @@ while True:
             ledYellow.value(0)      
 
     if batteryStateInput.value() == 0 and not operationInProgress:
-        if batteryCharged:
+        if chargingStateInput.value() == 1:
             operation = "START CHARGING"
             ledGreen.value(1)           
             ledRed.value(0)  
@@ -129,10 +97,10 @@ while True:
         operationInProgress = True
 
         relayTimer.init(period=RELAY_TIMER_DELAY, mode=Timer.ONE_SHOT, callback=relay_release) 
-        batteryStatusCheckTimer.init(period=BATTERY_STATUS_CHECK_DELAY, mode=Timer.ONE_SHOT, callback=battery_status_check)
+        restartTimer.deinit()  # зупинити таймер перезапуску ESP32, якщо він був активний
 
     if batteryStateInput.value() == 0 and operationInProgress:
-        if batteryCharged:
+        if chargingStateInput.value() == 1:
             ledGreen.value(1)
             ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
         else:
@@ -140,12 +108,10 @@ while True:
             ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
 
     if batteryStateInput.value() == 1 and operationInProgress:
-        batteryStatusCheckTimer.deinit()  # зупинити таймер перевірки стану батареї
-        batteryCharged = not batteryCharged
         operationInProgress = False
 
         # Перезапуск ESP32 через таймер після завершення операції зарядки батареї
-        if batteryCharged:
+        if chargingStateInput.value() == 1:
             restartTimer.init(period=RESTART_DELAY, mode=machine.Timer.ONE_SHOT, callback=restart)
         
     displayMessage = time_service.local_time() + "     " + operation
