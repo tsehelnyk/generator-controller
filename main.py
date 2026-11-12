@@ -43,15 +43,12 @@ operationInProgress = False         # стан виконання операці
 # Ініціалізація watchdog (5 секунд)
 wdt = WDT(timeout=WATCHDOG_TIMEOUT)
 
-# Функція для перезапуску через таймер
 def restart(timer):
-    # print("Регулярний перезапуск ESP32...")
     machine.reset()
 
 def led_blink(timer, led):
     led.value(0)
 
-# Функція, яку викликає таймер
 def relay_release(timer):
     relayKillSwitchOut.value(1)     # вимкнути реле Kill Switch
     relayIgnitionOut.value(1)       # вимкнути реле Ignition
@@ -65,30 +62,30 @@ restartTimer = machine.Timer(3)
 
 displayMessage = "Starting..."
 sleep = 1
-operation = ""
+operation = Operation.discharging
 
 while True:
     if batteryStateInput.value() == 1 and not operationInProgress:
         if chargingStateInput.value() == 1:
-            operation = "DISCHARGING"
+            operation = Operation.discharging
             ledGreen.value(0)           
             ledYellow.value(1)          
             ledRed.value(0)  
         else:
-            operation = "CHARGING"
+            operation = Operation.charging
             ledGreen.value(1)           
             ledRed.value(0)  
             ledYellow.value(0)      
 
     if batteryStateInput.value() == 0 and not operationInProgress:
         if chargingStateInput.value() == 1:
-            operation = "START CHARGING"
+            operation = Operation.start_charging
             ledGreen.value(1)           
             ledRed.value(0)  
             ledYellow.value(1)                
             relayIgnitionOut.value(0)   # увімкнути реле Ignition
         else:
-            operation = "STOP CHARGING"
+            operation = Operation.stop_charging
             ledGreen.value(0)     
             ledRed.value(1)      
             ledYellow.value(1)          
@@ -100,10 +97,10 @@ while True:
         restartTimer.deinit()  # зупинити таймер перезапуску ESP32, якщо він був активний
 
     if batteryStateInput.value() == 0 and operationInProgress:
-        if chargingStateInput.value() == 1:
+        if operation == Operation.start_charging:
             ledGreen.value(1)
             ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledGreen))
-        else:
+        else if operation == Operation.stop_charging:
             ledRed.value(1)
             ledTimer.init(period=BLINK_DELAY, mode=Timer.ONE_SHOT, callback=lambda t: led_blink(t, ledRed))
 
@@ -114,7 +111,7 @@ while True:
         if chargingStateInput.value() == 1:
             restartTimer.init(period=RESTART_DELAY, mode=machine.Timer.ONE_SHOT, callback=restart)
         
-    displayMessage = time_service.local_time() + "     " + operation
+    displayMessage = time_service.local_time() + "     " + operation.value
     display_service.display_message(oled, displayMessage)  
     wdt.feed()                            # скидання таймера watchdog  
     time.sleep(sleep) 
