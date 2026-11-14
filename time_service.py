@@ -19,6 +19,6 @@ def init_time():
     # Перевірка часу
     print("UTC час:", time.localtime())
 
-def local_time(offset=3):
+def local_time(offset=2):
     t = time.localtime(time.time() + offset*3600)
     return "{:02d}:{:02d}:{:02d}".format(t[3], t[4], t[5])
